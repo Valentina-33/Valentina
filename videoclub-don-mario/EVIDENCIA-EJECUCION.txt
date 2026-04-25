@@ -1,0 +1,106 @@
+==========================================================
+ EVIDENCIA DE EJECUCION - Videoclub de Don Mario
+ Fecha: 2026-04-25 17:43:17
+ Comando: java -jar target/videoclub-don-mario.jar
+==========================================================
+
+>>> CASO 1 (enunciado): Cliente Premium, peliculas 1 y 3
+Entrada: 2 [ENTER] 1,3 [ENTER]
+----------------------------------------------------------
+====================================
+   VIDEOCLUB DE DON MARIO
+====================================
+
+Peliculas disponibles:
+  1. [Fisica] Interestellar - $8.000 - Disponible
+  2. [Fisica] El Padrino - $7.000 - No disponible
+  3. [Digital] Inception - $5.000 - Disponible
+  4. [Digital] Matrix - $6.000 - Disponible
+
+Membresia del cliente (1=Basica / 2=Premium): Seleccione peliculas (numeros separados por coma): 
+--- RECIBO DE ALQUILER ---
+Cliente: Premium
+Peliculas:
+ - Interestellar (Fisica) - $8.000
+ - Inception (Digital) - $5.000
+Subtotal: $13.000
+Descuento (20%): $2.600
+Total a pagar: $10.400
+--------------------------
+¡Disfrute su pelicula!
+
+>>> CASO 2: Cliente Basica, peliculas 1 y 4 (sin descuento)
+Entrada: 1 [ENTER] 1,4 [ENTER]
+----------------------------------------------------------
+====================================
+   VIDEOCLUB DE DON MARIO
+====================================
+
+Peliculas disponibles:
+  1. [Fisica] Interestellar - $8.000 - Disponible
+  2. [Fisica] El Padrino - $7.000 - No disponible
+  3. [Digital] Inception - $5.000 - Disponible
+  4. [Digital] Matrix - $6.000 - Disponible
+
+Membresia del cliente (1=Basica / 2=Premium): Seleccione peliculas (numeros separados por coma): 
+--- RECIBO DE ALQUILER ---
+Cliente: Basica
+Peliculas:
+ - Interestellar (Fisica) - $8.000
+ - Matrix (Digital) - $6.000
+Subtotal: $14.000
+Descuento (0%): $0
+Total a pagar: $14.000
+--------------------------
+¡Disfrute su pelicula!
+
+>>> CASO 3: Validacion - intentar alquilar 'El Padrino' (no disponible)
+Entrada: 2 [ENTER] 2 [ENTER] 1 [ENTER]
+----------------------------------------------------------
+====================================
+   VIDEOCLUB DE DON MARIO
+====================================
+
+Peliculas disponibles:
+  1. [Fisica] Interestellar - $8.000 - Disponible
+  2. [Fisica] El Padrino - $7.000 - No disponible
+  3. [Digital] Inception - $5.000 - Disponible
+  4. [Digital] Matrix - $6.000 - Disponible
+
+Membresia del cliente (1=Basica / 2=Premium): Seleccione peliculas (numeros separados por coma):   -> 'El Padrino' no esta disponible.
+Seleccione peliculas (numeros separados por coma): 
+--- RECIBO DE ALQUILER ---
+Cliente: Premium
+Peliculas:
+ - Interestellar (Fisica) - $8.000
+Subtotal: $8.000
+Descuento (20%): $1.600
+Total a pagar: $6.400
+--------------------------
+¡Disfrute su pelicula!
+
+>>> CASO 4: Validacion - membresia invalida, luego correcta
+Entrada: gold [ENTER] 5 [ENTER] 2 [ENTER] 4 [ENTER]
+----------------------------------------------------------
+====================================
+   VIDEOCLUB DE DON MARIO
+====================================
+
+Peliculas disponibles:
+  1. [Fisica] Interestellar - $8.000 - Disponible
+  2. [Fisica] El Padrino - $7.000 - No disponible
+  3. [Digital] Inception - $5.000 - Disponible
+  4. [Digital] Matrix - $6.000 - Disponible
+
+Membresia del cliente (1=Basica / 2=Premium):   -> Opcion invalida. Intente de nuevo.
+Membresia del cliente (1=Basica / 2=Premium):   -> Opcion invalida. Intente de nuevo.
+Membresia del cliente (1=Basica / 2=Premium): Seleccione peliculas (numeros separados por coma): 
+--- RECIBO DE ALQUILER ---
+Cliente: Premium
+Peliculas:
+ - Matrix (Digital) - $6.000
+Subtotal: $6.000
+Descuento (20%): $1.200
+Total a pagar: $4.800
+--------------------------
+¡Disfrute su pelicula!
