@@ -1,21 +1,12 @@
 package eci.edu.byteProgramming.ejercicio.paper.util;
 
+/**
+ * Estado del flujo de un pago dentro del sistema.
+ */
 public enum PaymentStatus {
-
-    PENDING("Pendiente"),
-    PROCESSING("Procesando"),
-    COMPLETED("Completado"),
-    FAILED("Fallido"),
-    CANCELED("Cancelado");
-    
-    private final String name;
-
-
-    PaymentStatus(String name) {
-        this.name = name;
-    } 
-   
-    
-    public String getName() { return name; }
-
+    PENDING,     // creado, sin validar
+    VALIDATED,   // valido, pendiente de ejecucion
+    REJECTED,    // no paso la validacion
+    COMPLETED,   // ejecutado correctamente
+    FAILED       // error durante la ejecucion
 }

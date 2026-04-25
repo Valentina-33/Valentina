@@ -1,0 +1,83 @@
+==================================================================
+ EVIDENCIA DE EJECUCION - Tienda Virtual (Problema #2)
+ Fecha: 2026-04-25 18:07:02
+==================================================================
+
+================== 1. EJECUCION PRINCIPAL ==========================
+Comando: java -cp target/classes eci.edu.byteProgramming.ejercicio.paper.Application
+------------------------------------------------------------------
+==========================================
+  TIENDA VIRTUAL - Sistema de Pagos
+==========================================
+Modulos suscritos al bus de eventos: 3
+
+--- Compra via Tarjeta de credito | cliente: ana@correo.com | monto: $3,080,000 ---
+  [Tarjeta] Validacion (monto<= $10,000,000 y correo valido): APROBADA
+  [Tarjeta] Cargando $3,080,000 a la tarjeta de ana@correo.com
+[Inventario] Descontando stock por compra de 2 producto(s):
+    - Laptop -> stock restante: 4
+    - Mouse -> stock restante: 19
+[Facturacion] Factura #FAC-1001 generada por $3,080,000 via Tarjeta de credito para ana@correo.com
+[Notificacion] Enviando correo a ana@correo.com -> 'Su pago via Tarjeta de credito por $3,080,000 fue exitoso. Gracias por su compra!'
+
+--- Compra via PayPal | cliente: luis@correo.com | monto: $330,000 ---
+  [PayPal] Validacion (correo y monto<= $8,000,000): APROBADA
+  [PayPal] Redirigiendo a PayPal para cobrar $330,000 a luis@correo.com
+[Inventario] Descontando stock por compra de 2 producto(s):
+    - Audifonos -> stock restante: 7
+    - Mouse -> stock restante: 18
+[Facturacion] Factura #FAC-1002 generada por $330,000 via PayPal para luis@correo.com
+[Notificacion] Enviando correo a luis@correo.com -> 'Su pago via PayPal por $330,000 fue exitoso. Gracias por su compra!'
+
+--- Compra via Criptomonedas | cliente: marta@correo.com | monto: $3,000,000 ---
+  [Crypto] Validacion (monto>= $10,000): APROBADA
+  [Crypto] Confirmando transaccion on-chain por $3,000,000 para marta@correo.com
+[Inventario] Descontando stock por compra de 1 producto(s):
+    - Laptop -> stock restante: 3
+[Facturacion] Factura #FAC-1003 generada por $3,000,000 via Criptomonedas para marta@correo.com
+[Notificacion] Enviando correo a marta@correo.com -> 'Su pago via Criptomonedas por $3,000,000 fue exitoso. Gracias por su compra!'
+
+--- Compra via Tarjeta de credito | cliente: fraude@correo.com | monto: $-100 ---
+  [Tarjeta] Validacion (monto<= $10,000,000 y correo valido): RECHAZADA
+  >> Pago RECHAZADO. No se notifica a los observadores.
+
+Stock final del catalogo:
+  - Laptop (id=P001, $3000000.0, stock=3)
+  - Mouse (id=P002, $80000.0, stock=18)
+  - Audifonos (id=P003, $250000.0, stock=7)
+
+================== 2. PRUEBAS UNITARIAS (JUnit 5) ==================
+Clases: ApplicationTest, auxiliaryTest
+------------------------------------------------------------------
+
+>>> eci.edu.byteProgramming.ejercicio.paper.ApplicationTest
+  [Tarjeta] Validacion (monto<= $10,000,000 y correo valido): APROBADA
+  [Tarjeta] Cargando $1,000 a la tarjeta de user@mail.com
+[Inventario] Descontando stock por compra de 1 producto(s):
+    - Item -> stock restante: 9
+[Facturacion] Factura #FAC-1001 generada por $1,000 via Tarjeta de credito para user@mail.com
+[Notificacion] Enviando correo a user@mail.com -> 'Su pago via Tarjeta de credito por $1,000 fue exitoso. Gracias por su compra!'
+  [PASS] creditCardSuccessNotifiesAllObservers
+  [PayPal] Validacion (correo y monto<= $8,000,000): RECHAZADA
+  [PASS] paypalRejectsAmountAboveLimit
+  [Crypto] Validacion (monto>= $10,000): RECHAZADA
+  [PASS] cryptoRejectsAmountBelowMinimum
+  [Tarjeta] Validacion (monto<= $10,000,000 y correo valido): RECHAZADA
+  [PASS] rejectedPaymentDoesNotNotifyObservers
+  [PASS] factoryDeliversCoherentMethod
+
+>>> eci.edu.byteProgramming.ejercicio.paper.util.auxiliaryTest
+  [PASS] productDecreaseStockNeverGoesNegative
+  [PASS] productRejectsNegativeDecrease
+  [PASS] eventObserverDispatchesToAllSubscribers
+  [PASS] eventObserverUnsubscribeStopsDelivery
+[EventBus] Error en observer auxiliaryTest$$Lambda$23/0x000000084008d840: boom
+  [PASS] eventObserverSurvivesObserverException
+  [PASS] eciPaymentConstructorRejectsBadInputs
+  [PayPal] Validacion (correo y monto<= $8,000,000): APROBADA
+  [PASS] factoryAndValidatorBelongToSameFamily
+  [PASS] allPaymentMethodsAreSupported
+
+============================================
+ Tests JUnit (src/test/java): 13 passed, 0 failed
+============================================

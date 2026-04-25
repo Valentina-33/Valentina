@@ -1,60 +1,48 @@
 package eci.edu.byteProgramming.ejercicio.paper.util;
 
-public class PaypalFactory extends PaymentMethod{
-    private String email;
-    private String paypalTransactionId;
-    private String authToken;
-    
-    public PaypalFactory(double amount, String customerId, String description,
-                 String email, String authToken) {
-        super(amount, customerId, description);
-        this.email = email;
-        this.authToken = authToken;
-    }
-    
+import java.util.List;
+
+/**
+ * Factory concreta para pagos con PAYPAL.
+ */
+public class PaypalFactory implements ECIPayment.Factory {
+
+    private static final double MAX_AMOUNT = 8_000_000.0;
+
     @Override
-    public boolean validatePaymentMethod() {
-        return validateEmail() && validateAuthToken();
+    public PaymentMethod getMethod() {
+        return PaymentMethod.PAYPAL;
     }
-    
-    private boolean validateEmail() {
-        return email != null && email.contains("@") && email.contains(".");
-    }
-    
-    private boolean validateAuthToken() {
-        return authToken != null && authToken.length() > 10;
-    }
-    
+
     @Override
-    public boolean processPayment() {
-        System.out.println("Processing PayPal payment...");
-        
-        if (!validatePaymentMethod()) {
-            System.out.println("PayPal validation failed!");
-            setStatus(PaymentStatus.FAILED);
-            return false;
-        }
-        
-        setStatus(PaymentStatus.PROCESSING);
-        
-        try {
-            Thread.sleep(1500);
-            this.paypalTransactionId = "PP" + System.currentTimeMillis();
-            System.out.println("PayPal payment authorized for: " + email);
-            
-            setStatus(PaymentStatus.COMPLETED);
-            return true;
-        } catch (Exception e) {
-            setStatus(PaymentStatus.FAILED);
-            return false;
-        }
+    public ECIPayment createPayment(String customerEmail, double amount, List<Product> products) {
+        return new ECIPayment(customerEmail, amount, products) {
+            @Override
+            public PaymentMethod getMethod() {
+                return PaymentMethod.PAYPAL;
+            }
+
+            @Override
+            public void execute() {
+                System.out.printf("  [PayPal] Redirigiendo a PayPal para cobrar $%,.0f a %s%n",
+                        getAmount(), getCustomerEmail());
+                setStatus(PaymentStatus.COMPLETED);
+            }
+        };
     }
-    
+
     @Override
-    public String getPaymentMethod() {
-        return "PAYPAL";
+    public ValidatePayment createValidator() {
+        return payment -> {
+            boolean correoValido = payment.getCustomerEmail().contains("@")
+                    && payment.getCustomerEmail().contains(".");
+            boolean montoValido = payment.getAmount() > 0
+                    && payment.getAmount() <= MAX_AMOUNT;
+            boolean ok = correoValido && montoValido;
+            System.out.println("  [PayPal] Validacion (correo y monto<= $"
+                    + String.format("%,.0f", MAX_AMOUNT) + "): "
+                    + (ok ? "APROBADA" : "RECHAZADA"));
+            return ok;
+        };
     }
-    
-    public String getEmail() { return email; }
-    public String getPaypalTransactionId() { return paypalTransactionId; }
 }

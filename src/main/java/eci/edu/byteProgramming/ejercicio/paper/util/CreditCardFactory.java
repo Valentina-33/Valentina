@@ -1,83 +1,50 @@
 package eci.edu.byteProgramming.ejercicio.paper.util;
 
-public class CreditCardFactory extends PaymentMethod{
-    private String number;
-    private String name;
-    private String expirationDate;
-    private String cvv;
-    private String cardType;
-    private String address;
-    
-    public CreditCardFactory(double amount, String customerID, String description,
-                     String number, String name, String expirationDate, String cvv, String address) {
-        super(amount, customerID, description);
-        this.number = number;
-        this.name = name;
-        this.expirationDate = expirationDate;
-        this.cvv = cvv;
-        this.cardType = determineCardType(number);
+import java.util.List;
+
+/**
+ * Factory concreta para pagos con TARJETA DE CREDITO.
+ *
+ * Crea tanto el pago (con su comportamiento de ejecucion) como el
+ * validador con sus propias reglas. La logica de compra solo conoce
+ * la abstraccion {@link ECIPayment.Factory}.
+ */
+public class CreditCardFactory implements ECIPayment.Factory {
+
+    private static final double MAX_AMOUNT = 10_000_000.0;
+
+    @Override
+    public PaymentMethod getMethod() {
+        return PaymentMethod.CREDIT_CARD;
     }
 
     @Override
-    public boolean validatePaymentMethod() {
-        return validateCardNumber() && validateCVV() && validateExpirationDate();
+    public ECIPayment createPayment(String customerEmail, double amount, List<Product> products) {
+        return new ECIPayment(customerEmail, amount, products) {
+            @Override
+            public PaymentMethod getMethod() {
+                return PaymentMethod.CREDIT_CARD;
+            }
+
+            @Override
+            public void execute() {
+                System.out.printf("  [Tarjeta] Cargando $%,.0f a la tarjeta de %s%n",
+                        getAmount(), getCustomerEmail());
+                setStatus(PaymentStatus.COMPLETED);
+            }
+        };
     }
-    
-    private boolean validateCardNumber() {
-        return number != null && number.length() >= 13 && number.length() <= 19;
-    }
-    
-    private boolean validateCVV() {
-        return cvv != null && cvv.length() >= 3 && cvv.length() <= 4;
-    }
-    
-    private boolean validateExpirationDate() {
-        // Formato MM/YY
-        return expirationDate != null && expirationDate.matches("\\d{2}/\\d{2}");
-    }
-    
+
     @Override
-    public boolean processPayment() {
-        System.out.println("Processing Credit Card payment...");
-        
-        if (!validatePaymentMethod()) {
-            System.out.println("Credit Card validation failed!");
-            setStatus(PaymentStatus.FAILED);
-            return false;
-        }
-        
-        setStatus(PaymentStatus.PROCESSING);
-        
-        // Simulación del procesamiento
-        try {
-            Thread.sleep(2000);
-            System.out.println("Contacting bank for card: " + maskCardNumber());
-            System.out.println("Payment authorized by bank");
-            
-            setStatus(PaymentStatus.COMPLETED);
-            return true;
-        } catch (Exception e) {
-            setStatus(PaymentStatus.FAILED);
-            return false;
-        }
+    public ValidatePayment createValidator() {
+        return payment -> {
+            boolean ok = payment.getAmount() > 0
+                    && payment.getAmount() <= MAX_AMOUNT
+                    && payment.getCustomerEmail().contains("@");
+            System.out.println("  [Tarjeta] Validacion (monto<= $"
+                    + String.format("%,.0f", MAX_AMOUNT) + " y correo valido): "
+                    + (ok ? "APROBADA" : "RECHAZADA"));
+            return ok;
+        };
     }
-    
-    @Override
-    public String getPaymentMethod() {
-        return "CREDIT_CARD";
-    }
-    
-    private String determineCardType(String cardNumber) {
-        if (cardNumber.startsWith("4")) return "VISA";
-        if (cardNumber.startsWith("5")) return "MASTERCARD";
-        if (cardNumber.startsWith("3")) return "AMEX";
-        return "UNKNOWN";
-    }
-    
-    public String maskCardNumber() {
-        return "**** **** **** " + number.substring(number.length() - 4);
-    }
-    
-    public String getCardHolderName() { return name; }
-    public String getCardType() { return cardType; }
 }

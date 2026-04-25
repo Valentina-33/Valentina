@@ -1,39 +1,57 @@
 package eci.edu.byteProgramming.ejercicio.paper.util;
 
-import javax.management.Notification;
+import java.util.ArrayList;
+import java.util.List;
 
-public class PaymentEventObserver implements PaymentObserver {
-    private Inventory inventory;
-    private Facturation facturation;
-    private Notification notification;
-    
-    public PaymentEventObserver(Inventory inventory, Facturation facturation, Notification notification) {
-        this.inventory = inventory;
-        this.facturation = facturation;
-        this.notification = notification;
-    }
-    
-    @Override
-    public void onPaymentSuccess(PaymentMethod payment, String customerName, String customerEmail, String productId) {
-        System.out.println("\nPayment Observer: Processing successful payment events...");
-        
-        Product product = inventory.getProduct(productId);
-        if (product != null) {
-            inventory.discountProduct(productId, 1);
+/**
+ * PATRON OBSERVER - rol "Subject" (publicador).
+ *
+ * Mantiene la lista de {@link PaymentObserver} y los notifica cuando
+ * un pago se procesa exitosamente. La logica de compra solo dispara
+ * el evento; los modulos suscritos reaccionan automaticamente.
+ *
+ * Permite agregar / quitar observadores en caliente, lo que cumple el
+ * requisito de extensibilidad sin tocar el core.
+ *
+ * SOLID:
+ *  - SRP: solo gestiona la suscripcion y la difusion de eventos.
+ *  - OCP: nuevos observadores se agregan sin modificar esta clase.
+ *  - DIP: depende de la abstraccion {@link PaymentObserver}.
+ */
+public class PaymentEventObserver {
+
+    private final List<PaymentObserver> observers = new ArrayList<>();
+
+    public void subscribe(PaymentObserver observer) {
+        if (observer == null) {
+            throw new IllegalArgumentException("El observer no puede ser nulo");
         }
-        
-        String productDetails = product != null ? product.getName() : "Product";
-        facturation.generateInvoice(payment, customerName, productDetails);
-        
-        notification.sendConfirmationEmail(customerEmail, customerName, payment);
-        
-        System.out.println("All post-payment processes completed successfully!\n");
+        if (!observers.contains(observer)) {
+            observers.add(observer);
+        }
     }
-    
-    @Override
-    public void onPaymentFailed(PaymentMethod payment, String customerEmail) {
-        System.out.println("\nPayment Observer: Processing failed payment events...");
-        notification.sendFailureNotification(payment, customerEmail);
-        System.out.println("Failed payment processes completed.\n");
+
+    public void unsubscribe(PaymentObserver observer) {
+        observers.remove(observer);
+    }
+
+    public int getObserverCount() {
+        return observers.size();
+    }
+
+    /**
+     * Notifica a todos los observadores suscritos que el pago fue
+     * procesado exitosamente. Si algun observer lanza excepcion, se
+     * captura y los demas continuan recibiendo el evento.
+     */
+    public void notifyPaymentProcessed(ECIPayment payment) {
+        for (PaymentObserver observer : observers) {
+            try {
+                observer.onPaymentProcessed(payment);
+            } catch (RuntimeException ex) {
+                System.err.println("[EventBus] Error en observer "
+                        + observer.getClass().getSimpleName() + ": " + ex.getMessage());
+            }
+        }
     }
 }

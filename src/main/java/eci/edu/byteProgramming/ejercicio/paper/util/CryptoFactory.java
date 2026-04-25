@@ -1,70 +1,46 @@
 package eci.edu.byteProgramming.ejercicio.paper.util;
 
-public class CryptoFactory extends PaymentMethod {
-    private String walletAddress;
-    private String cryptoType;
-    private String token;
-    private double walletBalance;
-    private String blockchainHash;
-    
-    public CryptoFactory(double amount, String customerId, String description,
-                 String walletAddress, String cryptoType, double walletBalance) {
-        super(amount, customerId, description);
-        this.walletAddress = walletAddress;
-        this.cryptoType = cryptoType;
-        this.token = token;
-        this.walletBalance = walletBalance;
-    }
-    
+import java.util.List;
+
+/**
+ * Factory concreta para pagos con CRIPTOMONEDAS.
+ */
+public class CryptoFactory implements ECIPayment.Factory {
+
+    private static final double MIN_AMOUNT = 10_000.0;
+
     @Override
-    public boolean validatePaymentMethod() {
-        return validateWalletAddress() && validateBalance();
+    public PaymentMethod getMethod() {
+        return PaymentMethod.CRYPTO;
     }
-    
-    private boolean validateWalletAddress() {
-        return walletAddress != null && walletAddress.length() >= 26;
-    }
-    
-    private boolean validateBalance() {
-        return walletBalance >= amount;
-    }
-    
+
     @Override
-    public boolean processPayment() {
-        System.out.println("Processing Cryptocurrency payment...");
-        
-        if (!validatePaymentMethod()) {
-            System.out.println("Crypto validation failed!");
-            setStatus(PaymentStatus.FAILED);
-            return false;
-        }
-        
-        setStatus(PaymentStatus.PROCESSING);
-        
-        try {
-            Thread.sleep(3000);
-            this.blockchainHash = generateBlockchainHash();
-            System.out.println("Transaction broadcasted to blockchain");
-            System.out.println("Blockchain hash: " + blockchainHash);
-            
-            setStatus(PaymentStatus.COMPLETED);
-            return true;
-        } catch (Exception e) {
-            setStatus(PaymentStatus.FAILED);
-            return false;
-        }
+    public ECIPayment createPayment(String customerEmail, double amount, List<Product> products) {
+        return new ECIPayment(customerEmail, amount, products) {
+            @Override
+            public PaymentMethod getMethod() {
+                return PaymentMethod.CRYPTO;
+            }
+
+            @Override
+            public void execute() {
+                System.out.printf("  [Crypto] Confirmando transaccion on-chain por $%,.0f para %s%n",
+                        getAmount(), getCustomerEmail());
+                setStatus(PaymentStatus.COMPLETED);
+            }
+        };
     }
-    
+
     @Override
-    public String getPaymentMethod() {
-        return "CRYPTOCURRENCY";
+    public ValidatePayment createValidator() {
+        return payment -> {
+            // Para criptomonedas se exige un minimo (cubrir fees) y correo valido
+            boolean ok = payment.getAmount() >= MIN_AMOUNT
+                    && payment.getCustomerEmail().contains("@");
+            System.out.println("  [Crypto] Validacion (monto>= $"
+                    + String.format("%,.0f", MIN_AMOUNT) + "): "
+                    + (ok ? "APROBADA" : "RECHAZADA"));
+            return ok;
+        };
     }
-    
-    private String generateBlockchainHash() {
-        return "0x" + Integer.toHexString((int)(Math.random() * Integer.MAX_VALUE));
-    }
-    
-    public String getWalletAddress() { return walletAddress; }
-    public String getCryptoType() { return cryptoType; }
-    public String getBlockchainHash() { return blockchainHash; }
 }
